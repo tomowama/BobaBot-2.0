@@ -1,2 +1,2 @@
-import BoardAndLegalMoves
+import GameState
 import SearchAndEvaluate
