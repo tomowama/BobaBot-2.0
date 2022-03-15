@@ -24,7 +24,12 @@ def Evaluate(Board):
 		elif Board[i] in blackPieces: # the piece is black
 			sum += blackValues[Board[i]]
 		elif Board[i].upper() in blackPieces: # the piece is white
-			sum += -1 * blackValues[Board[i].upper()]			
+			sum += -1 * blackValues[Board[i].upper()]	
+		for square in [64,65,76,77]:
+			if Board[square] == 'p':
+				sum += 250
+			elif Board[square] == 'P':
+				sum += -250		
 	
 	return sum
 
@@ -34,27 +39,32 @@ def Evaluate(Board):
 
 
 
-def Search(Board, depth, color, bestEval, whiteOrBlack):
+def Search(Board, depth, color, MAX, MIN):
 
 	moves = GameState.genMoves(Board, color)
-	
+	#print(f"we are in depth {depth} and our color of the node is {color}")
+	#print('')
 	if depth == 0:
 		return [Evaluate(Board)]
 	
 	i = 0
-	added = False
 	while i< len(moves):
 		move = moves[i]
 		takenSquare = Board[move[1]]
 		startSquare = Board[move[0]]
 		Board = GameState.makeMove(Board, move)
-		eval = Search(Board, depth-1, not color, bestEval, whiteOrBlack)[0]
+		eval = Search(Board, depth-1, not color, MAX, MIN)[0]
 		Board = GameState.undoMove(Board, move, takenSquare, startSquare)
+		#print(f"we checked move {GameState.readableMoves([move])} which has an evaluation of {eval}")
 		
-		if (eval > bestEval[0]) and whiteOrBlack:
-			bestEval = [eval, move]
-		elif (eval < bestEval[0]) and not whiteOrBlack:
-			bestEval = [eval, move]
+		if color: # we are white
+			#print(f"we are at depth {depth}, color {color} checking if {eval} > {MAX}")
+			MAX = max(MAX, eval)
+			bestEval = [MAX, move]
+		elif not color: # we are black
+			#print(f"we are at depth {depth}, color {color} checking if {eval} < {MIN}")
+			MIN = min(MIN, eval)
+			bestEval = [MIN, move]
 		#elif eval == bestEval[0]:
 			#bestEval.append(move)
 		i+=1
